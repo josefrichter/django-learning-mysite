@@ -5,6 +5,7 @@ from django.views import generic
 from django.utils import timezone
 
 from .models import Choice, Question
+from .forms import QuestionForm
 
 
 class IndexView(generic.ListView):
@@ -49,3 +50,18 @@ def vote(request, question_id):
         # with POST data. This prevents data from being posted twice if a
         # user hits the Back button.
         return HttpResponseRedirect(reverse('polls:results', args=(question.id,)))
+
+def create_question_view(request):
+    """ Process new question form """
+    if request.method == 'POST':
+        form = QuestionForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            # Get the current instance object to display in the template
+            img_obj = form.instance
+            return render(request, 'polls/create.html', {'form': form, 'img_obj': img_obj})
+    else:
+        form = QuestionForm()
+    
+    return render(request, 'polls/create.html', {'form': form})
+    
